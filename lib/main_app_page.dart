@@ -1,6 +1,9 @@
 import 'package:analog_clock/analog_clock.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_time_zone_clock/reusuableWidget/timezone_card.dart';
 import 'package:flutter_time_zone_clock/colors.dart';
+import 'package:flutter_time_zone_clock/time_manager.dart';
+import 'package:provider/provider.dart' as selector;
 
 class MainAppPage extends StatefulWidget {
   const MainAppPage({Key? key}) : super(key: key);
@@ -11,134 +14,361 @@ class MainAppPage extends StatefulWidget {
 
 class _MainAppPageState extends State<MainAppPage> {
   @override
+  void initState() {
+    super.initState();
+    context.read<TimeManager>().changetime();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     double topheight = height * 0.58;
-    double bottomheight = height * 0.36;
-    double maincontainerpadding = height * 0.06;
+    double bottomheight = height * 0.42;
+    final ScrollController _controller = ScrollController();
+    void _scrollup() {
+      _controller.animateTo(
+        _controller.position.minScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
 
     return Scaffold(
-      backgroundColor: Appcolor.kscaffoldbackgroundcolor,
-      body: Container(
-        margin: EdgeInsets.only(
-            top: maincontainerpadding * 0.74,
-            bottom: maincontainerpadding * 0.26,
-            right: 10,
-            left: 10),
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Appcolor.kmainappoagebackgroundcolor,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                width: width,
-                height: topheight,
+      backgroundColor: Appcolor.kmainappoagebackgroundcolor,
+      body: SafeArea(
+        child: selector.Consumer<TimeManager>(
+          builder: (context, value, child) {
+            return Container(
+              margin: EdgeInsets.only(
+                top: height * 0.01,
+              ),
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                color: Appcolor.kmainappoagebackgroundcolor,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: SingleChildScrollView(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'World Clock',
-                      style: TextStyle(
-                        color: Appcolor.kappbuttoncolor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30,
-                      ),
-                    ),
-                    AnalogClock(
-                      width: width * 0.6,
-                      height: height * 0.3,
-                      showNumbers: true,
-                      isLive: true,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          width: 2,
-                          color: Appcolor.kclockbordercolor,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 5),
-                      child: RichText(
-                        textAlign: TextAlign.start,
-                        text: const TextSpan(
-                          text: '10:30',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Appcolor.ktextcolor2,
-                            fontWeight: FontWeight.w600,
+                    SizedBox(
+                      width: width,
+                      height: topheight,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              AnalogClock(
+                                width: width * 0.6,
+                                height: height * 0.3,
+                                digitalClockColor: Appcolor.kappbuttoncolor,
+                                textScaleFactor: 1.5,
+                                showDigitalClock: true,
+                                showAllNumbers: true,
+                                datetime: value.currentlocationtime,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    width: 2,
+                                    color: Appcolor.kclockbordercolor,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: height * 0.205,
+                                left: 60,
+                                child: const Text(
+                                  'current location',
+                                  style: TextStyle(
+                                    color: Appcolor.kappbuttoncolor,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          children: [
-                            TextSpan(
-                              text: 'pm\n  Wed, July 3',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: Appcolor.ktextcolor2,
+                          Container(
+                            margin: const EdgeInsets.only(top: 5),
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: value.time,
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  color: Appcolor.ktextcolor2,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: '\n' + value.date + '  ',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: Appcolor.ktextcolor2,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: value.getzone,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Appcolor.kappbuttoncolor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
-                    )
+                    ),
+                    SizedBox(
+                      width: width,
+                      height: bottomheight,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 24,
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.only(top: 30, bottom: 57),
+                              width: width,
+                              height: bottomheight,
+                              decoration: BoxDecoration(
+                                color: Appcolor.klocationtimecolor,
+                                borderRadius: BorderRadius.circular(35),
+                              ),
+                              child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  controller: _controller,
+                                  itemCount: value.selectedlocation.length,
+                                  itemBuilder: (context, i) {
+                                    String cardkey = value.selectedlocation[i];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10),
+                                      child: RawMaterialButton(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        splashColor: Colors.purple,
+                                        onPressed: () {
+                                          value.setnewzone(cardkey);
+                                          value.removefromselectedlocation(
+                                              cardkey);
+                                          value.addtoselectedlocation(cardkey);
+                                          _scrollup();
+                                        },
+                                        child: TimeZoneCard(
+                                          containercolor: i == 0
+                                              ? Colors.white
+                                              : Appcolor.klocationtimecolor,
+                                          textcolor: i == 0
+                                              ? Appcolor.klocationtimecolor
+                                              : Colors.white,
+                                          width: width,
+                                          cardkey: cardkey,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            ),
+                          ),
+                          Positioned(
+                            left: width * 0.4,
+                            child: CircleAvatar(
+                              radius: 25,
+                              backgroundColor: Appcolor.kappbuttoncolor,
+                              child: MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(60),
+                                ),
+                                onPressed: () {
+                                  alllocationcard(
+                                      context, width, height, value);
+                                  _scrollup();
+                                },
+                                child: const Icon(
+                                  Icons.arrow_upward,
+                                  size: 15,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              SizedBox(
-                width: width,
-                height: bottomheight,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 24,
-                      child: Container(
-                        width: width * 0.95,
-                        height: bottomheight - 20,
-                        decoration: const BoxDecoration(
-                          color: Appcolor.klocationtimecolor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(35),
-                            topRight: Radius.circular(35),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<dynamic> alllocationcard(
+    BuildContext context,
+    double width,
+    double height,
+    TimeManager value,
+  ) {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.transparent,
+      isDismissible: false,
+      context: context,
+      builder: (BuildContext bc) {
+        return SizedBox(
+          width: width,
+          height: height * 0.7,
+          child: Stack(
+            children: [
+              Positioned(
+                top: height * 0.05,
+                child: Container(
+                  width: width,
+                  height: height * 0.65,
+                  decoration: const BoxDecoration(
+                    color: Appcolor.klocationtimecolor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(10, 40, 10, 0),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(
+                            right: 20,
+                            left: 20,
+                          ),
+                          width: width * 0.9,
+                          height: height * 0.07,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TextField(
+                            onChanged: (search) {
+                              context
+                                  .read<TimeManager>()
+                                  .updatesearchlocation(search);
+                            },
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText: 'Enter city name',
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                },
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.only(top: 5, bottom: 5),
+                                  width: 40,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: Appcolor.kappbuttoncolor,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Center(
+                                      child: Text(
+                                    'Search',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15),
+                                  )),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                        child: ListView.builder(
-                            itemCount: 3,
-                            itemBuilder: (context, i) {
-                              return Container(
-                                height: 100,
-                                margin: const EdgeInsets.only(
-                                    left: 20, right: 20, bottom: 10, top: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              );
-                            }),
-                      ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: value.searchresult.isNotEmpty
+                                ? ListView.builder(
+                                    itemCount: value.searchresult.length,
+                                    itemBuilder: (context, i) {
+                                      String key = value.searchresult[i];
+                                      return RawMaterialButton(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          splashColor: Colors.purple,
+                                          onPressed: () {
+                                            value.setnewzone(key);
+                                            if (value.selectedlocation
+                                                .contains(key)) {
+                                              value.removefromselectedlocation(
+                                                  key);
+
+                                              value
+                                                  .searchlocation('searchword');
+                                            } else {
+                                              value.addtoselectedlocation(key);
+                                            }
+                                            value.addtoselectedlocation(key);
+                                            Navigator.pop(context);
+                                          },
+                                          child: TimeZoneCard(
+                                            cardkey: key,
+                                            width: width,
+                                          ));
+                                    })
+                                : const Text(
+                                    'No result found',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        )
+                      ],
                     ),
-                    Positioned(
-                      left: width * 0.4,
-                      child: const CircleAvatar(
-                        radius: 25,
-                        backgroundColor: Appcolor.kappbuttoncolor,
-                        child: Icon(
-                          Icons.add,
-                          size: 12,
-                        ),
-                      ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: width * 0.4,
+                top: height * 0.02,
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Appcolor.kappbuttoncolor,
+                  child: MaterialButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(60),
                     ),
-                  ],
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<TimeManager>().updatesearchlocation('');
+                    },
+                    child: const Icon(
+                      Icons.arrow_downward,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
