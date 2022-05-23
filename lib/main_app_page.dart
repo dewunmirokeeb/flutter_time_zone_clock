@@ -1,5 +1,6 @@
 import 'package:analog_clock/analog_clock.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_time_zone_clock/reusuableWidget/timezone_card.dart';
 import 'package:flutter_time_zone_clock/colors.dart';
 import 'package:flutter_time_zone_clock/time_manager.dart';
@@ -60,30 +61,35 @@ class _MainAppPageState extends State<MainAppPage> {
                         children: [
                           Stack(
                             children: [
-                              AnalogClock(
-                                width: width * 0.6,
-                                height: height * 0.3,
-                                digitalClockColor: Appcolor.kappbuttoncolor,
-                                textScaleFactor: 1.5,
-                                showDigitalClock: true,
-                                showAllNumbers: true,
-                                datetime: value.currentlocationtime,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 2,
-                                    color: Appcolor.kclockbordercolor,
+                              Positioned(
+                                child: AnalogClock(
+                                  width: width * 0.6,
+                                  height: height * 0.3,
+                                  digitalClockColor: Appcolor.kappbuttoncolor,
+                                  textScaleFactor: 1.5,
+                                  showDigitalClock: true,
+                                  showAllNumbers: true,
+                                  datetime: value.currentlocationtime,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      width: 2,
+                                      color: Appcolor.kclockbordercolor,
+                                    ),
                                   ),
                                 ),
                               ),
                               Positioned(
-                                top: height * 0.205,
-                                left: 60,
-                                child: const Text(
-                                  'current location',
-                                  style: TextStyle(
-                                    color: Appcolor.kappbuttoncolor,
-                                    fontSize: 17,
+                                top: height * 0.21,
+                                left: 0,
+                                right: 0,
+                                child: const Center(
+                                  child: Text(
+                                    'current location',
+                                    style: TextStyle(
+                                      color: Appcolor.kappbuttoncolor,
+                                      fontSize: 17,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -149,37 +155,101 @@ class _MainAppPageState extends State<MainAppPage> {
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 10),
-                                      child: RawMaterialButton(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        splashColor: Colors.purple,
-                                        onPressed: () {
-                                          value.setnewzone(cardkey);
-                                          value.removefromselectedlocation(
-                                              cardkey);
-                                          value.addtoselectedlocation(cardkey);
-                                          _scrollup();
-                                        },
-                                        child: TimeZoneCard(
-                                          containercolor: i == 0
-                                              ? Colors.white
-                                              : Appcolor.klocationtimecolor,
-                                          textcolor: i == 0
-                                              ? Appcolor.klocationtimecolor
-                                              : Colors.white,
-                                          width: width,
-                                          cardkey: cardkey,
-                                        ),
-                                      ),
+                                      child: value.selectedlocation.length == 1
+                                          ? TimeZoneCard(
+                                              width: width,
+                                              cardkey: cardkey,
+                                            )
+                                          : GestureDetector(
+                                              onTap: () {
+                                                context
+                                                    .read<TimeManager>()
+                                                    .setnewzone(cardkey);
+                                                context
+                                                    .read<TimeManager>()
+                                                    .removefromselectedlocation(
+                                                        cardkey);
+                                                context
+                                                    .read<TimeManager>()
+                                                    .addtoselectedlocation(
+                                                        cardkey);
+                                                _scrollup();
+                                              },
+                                              child: Slidable(
+                                                endActionPane: ActionPane(
+                                                  motion: const ScrollMotion(),
+                                                  children: [
+                                                    Column(
+                                                      children: [
+                                                        const Spacer(),
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            if (i == 0) {
+                                                              context
+                                                                  .read<
+                                                                      TimeManager>()
+                                                                  .setnewzone(
+                                                                      value.selectedlocation[
+                                                                          i + 1]);
+                                                              context
+                                                                  .read<
+                                                                      TimeManager>()
+                                                                  .removefromselectedlocation(
+                                                                      cardkey);
+
+                                                              _scrollup();
+                                                            } else {
+                                                              context
+                                                                  .read<
+                                                                      TimeManager>()
+                                                                  .removefromselectedlocation(
+                                                                      cardkey);
+
+                                                              _scrollup();
+                                                            }
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons.delete,
+                                                            size: 50,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        const Spacer(),
+                                                        const Text(
+                                                          '    Delete',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.white,
+                                                            fontSize: 20,
+                                                          ),
+                                                        ),
+                                                        const Spacer(),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                                child: TimeZoneCard(
+                                                  containercolor: i == 0
+                                                      ? Colors.white
+                                                      : Appcolor
+                                                          .klocationtimecolor,
+                                                  textcolor: i == 0
+                                                      ? Appcolor
+                                                          .klocationtimecolor
+                                                      : Colors.white,
+                                                  width: width,
+                                                  cardkey: cardkey,
+                                                ),
+                                              ),
+                                            ),
                                     );
                                   }),
                             ),
                           ),
                           Positioned(
-                            left: width * 0.4,
+                            left: 0,
+                            right: 0,
                             child: CircleAvatar(
                               radius: 25,
                               backgroundColor: Appcolor.kappbuttoncolor,
@@ -188,8 +258,7 @@ class _MainAppPageState extends State<MainAppPage> {
                                   borderRadius: BorderRadius.circular(60),
                                 ),
                                 onPressed: () {
-                                  alllocationcard(
-                                      context, width, height, value);
+                                  alllocationcard(context, width, height);
                                   _scrollup();
                                 },
                                 child: const Icon(
@@ -217,7 +286,6 @@ class _MainAppPageState extends State<MainAppPage> {
     BuildContext context,
     double width,
     double height,
-    TimeManager value,
   ) {
     return showModalBottomSheet(
       isScrollControlled: true,
@@ -264,79 +332,86 @@ class _MainAppPageState extends State<MainAppPage> {
                                   .read<TimeManager>()
                                   .updatesearchlocation(search);
                             },
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: InputBorder.none,
                               labelText: 'Enter city name',
-                              suffixIcon: GestureDetector(
-                                onTap: () {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                },
-                                child: Container(
-                                  margin:
-                                      const EdgeInsets.only(top: 5, bottom: 5),
-                                  width: 40,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: Appcolor.kappbuttoncolor,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Center(
-                                      child: Text(
-                                    'Search',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15),
-                                  )),
-                                ),
-                              ),
+                              // suffixIcon: GestureDetector(
+                              //   onTap: () {
+                              //     FocusManager.instance.primaryFocus?.unfocus();
+                              //   },
+                              //   child: Container(
+                              //     margin:
+                              //         const EdgeInsets.only(top: 5, bottom: 5),
+                              //     width: 40,
+                              //     height: 20,
+                              //     decoration: BoxDecoration(
+                              //       color: Appcolor.kappbuttoncolor,
+                              //       borderRadius: BorderRadius.circular(10),
+                              //     ),
+                              //     child: const Center(
+                              //         child: Text(
+                              //       'Search',
+                              //       style: TextStyle(
+                              //           color: Colors.white,
+                              //           fontWeight: FontWeight.bold,
+                              //           fontSize: 15),
+                              //     )),
+                              //   ),
+                              // ),
                             ),
                           ),
                         ),
                         Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 20),
-                            child: value.searchresult.isNotEmpty
-                                ? ListView.builder(
-                                    itemCount: value.searchresult.length,
-                                    itemBuilder: (context, i) {
-                                      String key = value.searchresult[i];
-                                      return RawMaterialButton(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
+                          child: selector.Consumer<TimeManager>(
+                              builder: (context, value, child) {
+                            return Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              child: value.searchresult.isNotEmpty
+                                  ? ListView.builder(
+                                      itemCount: value.searchresult.length,
+                                      itemBuilder: (context, i) {
+                                        String key = value.searchresult[i];
+                                        return RawMaterialButton(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                20,
+                                              ),
                                             ),
-                                          ),
-                                          splashColor: Colors.purple,
-                                          onPressed: () {
-                                            value.setnewzone(key);
-                                            if (value.selectedlocation
-                                                .contains(key)) {
-                                              value.removefromselectedlocation(
-                                                  key);
-
-                                              value
-                                                  .searchlocation('searchword');
-                                            } else {
-                                              value.addtoselectedlocation(key);
-                                            }
-                                            value.addtoselectedlocation(key);
-                                            Navigator.pop(context);
-                                          },
-                                          child: TimeZoneCard(
-                                            cardkey: key,
-                                            width: width,
-                                          ));
-                                    })
-                                : const Text(
-                                    'No result found',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                            splashColor: Colors.purple,
+                                            onPressed: () {
+                                              value.setnewzone(key);
+                                              context
+                                                  .read<TimeManager>()
+                                                  .updatesearchlocation('');
+                                              if (value.selectedlocation
+                                                  .contains(key)) {
+                                                value
+                                                    .removefromselectedlocation(
+                                                        key);
+                                                value
+                                                    .addtoselectedlocation(key);
+                                              } else {
+                                                value
+                                                    .addtoselectedlocation(key);
+                                              }
+                                              Navigator.pop(context);
+                                            },
+                                            child: TimeZoneCard(
+                                              cardkey: key,
+                                              width: width,
+                                            ));
+                                      })
+                                  : const Text(
+                                      'No result found',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                          ),
+                            );
+                          }),
                         )
                       ],
                     ),
@@ -344,7 +419,8 @@ class _MainAppPageState extends State<MainAppPage> {
                 ),
               ),
               Positioned(
-                left: width * 0.4,
+                left: 0,
+                right: 0,
                 top: height * 0.02,
                 child: CircleAvatar(
                   radius: 25,

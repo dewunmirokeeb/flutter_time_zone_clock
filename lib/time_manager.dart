@@ -56,10 +56,12 @@ class TimeManager with ChangeNotifier {
   }
 
   List<String> _selectedlocations = [
-    'Africa/Abidjan',
-    'America/Nuuk',
-    'Asia/Istanbul',
-    'Europe/Athens'
+    'Europe/Moscow',
+    'Europe/London',
+    'Asia/Bangkok',
+    'Asia/Tokyo',
+    'Europe/Paris',
+    'Asia/Shanghai'
   ];
   get selectedlocation => _selectedlocations;
   _savelocationtoprefs() async {
